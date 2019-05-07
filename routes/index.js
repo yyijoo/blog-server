@@ -7,21 +7,21 @@ const Til = require("../models/til");
 var showdown = require("showdown");
 var converter = new showdown.Converter();
 
-router.post("/api/addtils", (req, res) => {
-  Til.create(
-    {
-      week: "11",
-      startDate: "190101",
-      endDate: "190101",
-      content: "test"
-    },
-    function(err, results) {
-      if (err) return handleError(err);
-      res.json(results);
-      // saved!
-    }
-  );
-});
+// router.post("/api/addtils", (req, res) => {
+//   Til.create(
+//     {
+//       week: "11",
+//       startDate: "190101",
+//       endDate: "190101",
+//       content: "test"
+//     },
+//     function(err, results) {
+//       if (err) return handleError(err);
+//       res.json(results);
+//       // saved!
+//     }
+//   );
+// });
 
 router.get("/api/til", (req, res) => {
   Til.find({}, function(err, result) {
@@ -55,13 +55,37 @@ router.get("/api/til", (req, res) => {
 });
 
 router.get("/api/til/search", (req, res) => {
-  console.log("req.query", req.query.keyword);
-  var keyword = req.query.keyword;
+  const keyword = req.query[0];
+  console.log("keyword", keyword);
   const newEx = new RegExp(keyword, "i");
+
   Til.find({ content: newEx }, function(err, result) {
-    console.log(":::::::::::::", result);
+    if (err) return handleError(error);
     res.header("Access-Control-Allow-Origin", "*");
-    res.json(result);
+
+    const formattedResult = [];
+
+    const formatDate = date => {
+      const yy = date
+        .getFullYear()
+        .toString()
+        .slice(2);
+      const mm = date.getMonth() + 1;
+      const dd = date.getDate();
+
+      return [yy, (mm > 9 ? "" : "0") + mm, (dd > 9 ? "" : "0") + dd].join("");
+    };
+
+    for (let i = 0; i < result.length; i++) {
+      const formatted = {};
+      formatted.week = result[i].week;
+      formatted.date =
+        formatDate(result[i].startDate) + "-" + formatDate(result[i].endDate);
+      formatted.content = converter.makeHtml(result[i].content);
+      formattedResult.unshift(formatted);
+    }
+    console.log("search result------>", formattedResult);
+    res.json(formattedResult);
   });
 });
 
