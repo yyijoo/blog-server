@@ -22,3 +22,14 @@ db.once("open", () => console.log("connected to mongod server"));
 const TilController = require("./routes");
 
 app.use("/", TilController);
+
+// cors configuration
+
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "http://localhost:8081",
+    credentials: true
+  })
+);
