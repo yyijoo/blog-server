@@ -6,7 +6,16 @@ router.get("/", (req, res) => {
   Blog.find({}, function(err, result) {
     if (err) return handleeError(error);
     res.header("Access-Control-Allow-Origin", "*");
-    console.log("here", result);
+    res.json(result);
+  });
+});
+
+router.get("/detail", (req, res) => {
+  console.log("req.query", req.query);
+  const _id = req.query._id;
+  Blog.find({ _id: _id }, function(err, result) {
+    if (err) return handleeError(error);
+    res.header("Access-Control-Allow-Origin", "*");
     res.json(result);
   });
 });
